@@ -304,5 +304,3 @@ And finally let's add an error message for each wrong login attempt :
 
 <br>
 <br>
-=======
->>>>>>> 414fd55a506548e1e83a25399c2462d77a17b288
