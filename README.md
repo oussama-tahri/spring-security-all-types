@@ -70,7 +70,7 @@ The Second method it's the same SecurityFilterChain from SecurityConfigInMemory.
 <br>
 <br>
 
-Our application.properties file that handles the datasource url, username and password also handles sql init mode which mean the application will always initialize our schema.sql file once starting the application
+Our application.properties file that handles the datasource url, username and password it also handles jpa hibernate ddl-auto as none so spring won't generate tables again and that helps with sql init mode which mean the application will always initialize our schema.sql file once starting the application, but if we choose our hibernate ddl-auto as update it will ignore our schema.sql
 <h4>application.properties</h4>
 
 <img src="captures/jdbcAppProps.png">
@@ -124,6 +124,7 @@ Once we start the application we get this login page :
 <br>
 <br>
 <hr>
+<<<<<<< HEAD
 
 ## **_3) UserDetailsService Authentication_**
 
@@ -303,3 +304,5 @@ And finally let's add an error message for each wrong login attempt :
 
 <br>
 <br>
+=======
+>>>>>>> 414fd55a506548e1e83a25399c2462d77a17b288
