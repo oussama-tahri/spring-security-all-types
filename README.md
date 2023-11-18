@@ -124,3 +124,182 @@ Once we start the application we get this login page :
 <br>
 <br>
 <hr>
+
+## **_3) UserDetailsService Authentication_**
+
+<br>
+To configure the application to use UserDetailsService Authentication security, first we need to add sub-packages of entities, repositories and services : 
+
+
+<br>
+
+<h4>Packages & Classes</h4>
+
+<img src="captures/allUserSecurityCls.png">
+
+<br>
+<br>
+
+For AppUser entity, we are going to implement it's class and repository as the following :
+
+<h4>AppUser.java</h4>
+
+<img src="captures/appUser.png">
+
+<br>
+
+<h4>AppUserRepository.java</h4>
+
+<img src="captures/appUserRepo.png">
+
+<br>
+<br>
+
+For AppRole entity, we are going to implement it's class and repository as the following :
+
+
+<h4>AppRole.java</h4>
+
+<img src="captures/appRole.png">
+
+<br>
+
+<h4>AppRoleRepository.java</h4>
+
+<img src="captures/appRoleRepo.png">
+
+<br>
+<br>
+<br>
+
+For the services needed we are going to do the following :<br>
+**1st** method is addNewUser is to create a new user defined by (***username***, ***password***, ***email***, ***confirmPassword***)<br>
+**2nd** method is addNewRole is to create a new role defined by (***role***)<br>
+**3rd** method is addRoleToUser is to define roles of each user (***username***, ***role***)<br>
+**4th** method is removeRoleFromUser is to remove any role from any user (***username***, ***role***)<br>
+**5th** method is loadUserByUsername is to load a user created before from the database using its username (***username***)<br>
+
+<h4>AccountService.java</h4>
+
+<img src="captures/securityServices.png">
+
+<br>
+<br>
+The implementation of these services :
+
+```java
+@Service
+@Transactional
+@AllArgsConstructor
+public class AccountServiceImpl implements AccountService {
+
+    private AppUserRepository appUserRepository;
+    private AppRoleRepository appRoleRepository;
+    private PasswordEncoder passwordEncoder;
+
+    @Override
+    public AppUser addNewUser(String username, String password, String email, String confirmPassword) {
+        AppUser user = appUserRepository.findByUsername(username);
+        if (user!=null) throw new RuntimeException("User already exist");
+        if (!password.equals(confirmPassword)) throw new RuntimeException("Wrong Password");
+        user = AppUser.builder()
+                .userId(UUID.randomUUID().toString())
+                .username(username)
+                .email(email)
+                .password(passwordEncoder.encode(password))
+                .build();
+        AppUser savedUser = appUserRepository.save(user);
+        return savedUser;
+    }
+
+    @Override
+    public AppRole addNewRole(String role) {
+        AppRole appRole = appRoleRepository.findById(role).orElse(null);
+        if (appRole!=null) throw new RuntimeException("Role already exists");
+        appRole = AppRole.builder()
+                .role(role)
+                .build();
+        AppRole savedRole = appRoleRepository.save(appRole);
+        return savedRole;
+    }
+
+    @Override
+    public void addRoleToUser(String username, String role) {
+        AppUser appUser = appUserRepository.findByUsername(username);
+        if (appUser==null) throw new RuntimeException("User doesn't exist");
+        AppRole appRole = appRoleRepository.findById(role).get();
+        appUser.getRoles().add(appRole);
+    }
+
+    @Override
+    public void removeRoleFromUser(String username, String role) {
+        AppUser appUser = appUserRepository.findByUsername(username);
+        if (appUser==null) throw new RuntimeException("User doesn't exist");
+        AppRole appRole = appRoleRepository.findById(role).get();
+        appUser.getRoles().remove(appRole);
+    }
+
+    @Override
+    public AppUser loadUserByUsername(String username) {
+        return appUserRepository.findByUsername(username);
+    }
+}
+
+```
+<br>
+<br><br>
+
+In this Class we implement loadUserByUsername from UserDetailsService to create a userDetails of type UserDetails and assert usernames, passwords and authorities of our AppUser entity into the userDetails
+
+<h4>UserDetailsServiceImpl.java</h4>
+
+<img src="captures/userDetailsServiceImpl.png">
+
+<br>
+<br><br>
+
+In the Security Config Class we use the passwordEncoder and SecurityFilterChain as the other security-types above.<br>
+The only difference is injecting userDetailsServiceImpl of type UserDetailsServiceImpl and use it in our SecurityFilterChain
+
+<h4>SecurityConfigUser.java</h4>
+
+<img src="captures/SecurityUserDetailsConfig.png">
+
+<br>
+<br><br>
+
+Now let's define each endpoint with it's suitable authority
+
+<h4>PatientController.java</h4>
+
+<img src="captures/addAuthorities.png">
+
+<br>
+<br><br>
+
+Let's test our services :
+
+<h4>CommandLineRunnerUserDetails</h4>
+
+<img src="captures/toTest.png">
+
+<br>
+<br>
+
+For this part we create an endpoint of profile which contains the informations about the profile logged in, username, authorities ...
+
+<h4>SecurityRestController.java</h4>
+
+<img src="captures/checkProfiles.png">
+
+<br>
+<br>
+
+And finally let's add an error message for each wrong login attempt :
+
+<h4>login.html</h4>
+
+<img src="captures/wrongUser.png">
+
+<br>
+<br>

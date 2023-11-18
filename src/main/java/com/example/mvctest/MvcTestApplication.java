@@ -2,6 +2,7 @@ package com.example.mvctest;
 
 import com.example.mvctest.entities.Patient;
 import com.example.mvctest.repositories.PatientRepository;
+import com.example.mvctest.security.userDetails.services.AccountService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -44,34 +45,50 @@ public class MvcTestApplication {
 
 
 
-    @Bean
-    CommandLineRunner commandLineRunner(JdbcUserDetailsManager jdbcUserDetailsManager) {
-        PasswordEncoder passwordEncoder = passwordEncoder();
+//    @Bean
+//    CommandLineRunner commandLineRunner(JdbcUserDetailsManager jdbcUserDetailsManager) {
+//        PasswordEncoder passwordEncoder = passwordEncoder();
+//        return args -> {
+//            UserDetails user11 = jdbcUserDetailsManager.loadUserByUsername("user11");
+//            if (user11==null)
+//            jdbcUserDetailsManager.createUser(
+//                    User.withUsername("user11")
+//                            .password(passwordEncoder.encode("1234"))
+//                            .roles("USER")
+//                            .build()
+//                    );
+//            UserDetails user22 = jdbcUserDetailsManager.loadUserByUsername("user22");
+//            if (user22==null)
+//            jdbcUserDetailsManager.createUser(
+//                    User.withUsername("user22")
+//                            .password(passwordEncoder.encode("1234"))
+//                            .roles("USER")
+//                            .build()
+//            );
+//            UserDetails admin11 = jdbcUserDetailsManager.loadUserByUsername("admin11");
+//            if (admin11==null)
+//            jdbcUserDetailsManager.createUser(
+//                    User.withUsername("admin11")
+//                            .password(passwordEncoder.encode("1234"))
+//                            .roles("USER","ADMIN")
+//                            .build()
+//            );
+//        };
+//    }
+
+
+    //@Bean
+    CommandLineRunner lunch(AccountService accountService) {
         return args -> {
-            UserDetails user11 = jdbcUserDetailsManager.loadUserByUsername("user11");
-            if (user11==null)
-            jdbcUserDetailsManager.createUser(
-                    User.withUsername("user11")
-                            .password(passwordEncoder.encode("1234"))
-                            .roles("USER")
-                            .build()
-                    );
-            UserDetails user22 = jdbcUserDetailsManager.loadUserByUsername("user22");
-            if (user22==null)
-            jdbcUserDetailsManager.createUser(
-                    User.withUsername("user22")
-                            .password(passwordEncoder.encode("1234"))
-                            .roles("USER")
-                            .build()
-            );
-            UserDetails admin11 = jdbcUserDetailsManager.loadUserByUsername("admin11");
-            if (admin11==null)
-            jdbcUserDetailsManager.createUser(
-                    User.withUsername("admin11")
-                            .password(passwordEncoder.encode("1234"))
-                            .roles("USER","ADMIN")
-                            .build()
-            );
+          accountService.addNewRole("USER");
+          accountService.addNewRole("ADMIN");
+          accountService.addNewUser("user11","1234","user11@users.com","1234");
+          accountService.addNewUser("user22","1234","user22@users.com","1234");
+          accountService.addNewUser("admin11","1234","admin11@admins.com","1234");
+          accountService.addRoleToUser("user11","USER");
+          accountService.addRoleToUser("user22","USER");
+          accountService.addRoleToUser("admin11","USER");
+          accountService.addRoleToUser("admin11","ADMIN");
         };
     }
 
